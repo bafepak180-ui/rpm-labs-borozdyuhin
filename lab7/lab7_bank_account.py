@@ -1,13 +1,14 @@
 # Лабораторная работа №7, вариант 3
 # Класс BankAccount: номер, владелец, баланс; пополнение, снятие, перевод
 
+
 class BankAccount:
     def __init__(self, number, owner, balance=0):
         self._number = number
         self._owner = owner
         self._balance = balance
 
-    # свойства для доступа к приватным полям
+    # доступ к приватным полям через свойства
     @property
     def number(self):
         return self._number
@@ -20,45 +21,45 @@ class BankAccount:
     def balance(self):
         return self._balance
 
-    @balance.setter
-    def balance(self, value):
-        if value < 0:
-            print("Баланс не может быть отрицательным")
-            return
-        self._balance = value
-
     # пополнение счёта
     def deposit(self, amount):
         if amount <= 0:
             print("Сумма пополнения должна быть больше нуля")
             return False
-        self.balance = self.balance + amount
+        self._balance += amount
+        print(f"{self._owner}: пополнение на {amount}, баланс {self._balance}")
         return True
 
-    # снятие денег
+    # снятие со счёта
     def withdraw(self, amount):
         if amount <= 0:
             print("Сумма снятия должна быть больше нуля")
             return False
-        if amount > self.balance:
-            print("Недостаточно средств на счёте", self.number)
+        if amount > self._balance:
+            print(f"{self._owner}: недостаточно средств (баланс {self._balance})")
             return False
-        self.balance = self.balance - amount
+        self._balance -= amount
+        print(f"{self._owner}: снятие {amount}, баланс {self._balance}")
         return True
 
     # перевод на другой счёт
     def transfer(self, other, amount):
-        if self.withdraw(amount):
-            other.deposit(amount)
-            print("Перевод", amount, "руб. со счёта", self.number, "на счёт", other.number)
-            return True
-        return False
+        if amount <= 0:
+            print("Сумма перевода должна быть больше нуля")
+            return False
+        if amount > self._balance:
+            print(f"{self._owner}: недостаточно средств для перевода")
+            return False
+        self._balance -= amount
+        other.deposit(amount)
+        print(f"Перевод {amount} от {self._owner} к {other.owner}")
+        return True
 
     def show(self):
-        print("Счёт", self.number, "| владелец:", self.owner, "| баланс:", self.balance)
+        print(f"Счёт {self._number}: {self._owner}, баланс {self._balance}")
 
 
-# ввод суммы с проверкой на число
+# чтение суммы с клавиатуры с проверкой
 def read_amount(text):
     try:
         return float(input(text))
@@ -68,31 +69,32 @@ def read_amount(text):
 
 
 def main():
-    # создаём счета
-    acc1 = BankAccount("1001", "Иванов", 5000)
-    acc2 = BankAccount("1002", "Петров", 1200)
-    acc3 = BankAccount("1003", "Сидорова", 0)
+    acc1 = BankAccount("001", "Иванов", 1000)
+    acc2 = BankAccount("002", "Петров", 500)
+    acc3 = BankAccount("003", "Сидоров")
 
-    print("--- Счета ---")
+    print("--- Все счета ---")
     for acc in (acc1, acc2, acc3):
         acc.show()
 
-    # пополнение и снятие
-    print("\n--- Пополнение и снятие ---")
-    amount = read_amount("Сумма пополнения для счёта 1003: ")
-    acc3.deposit(amount)
-    amount = read_amount("Сумма снятия со счёта 1001: ")
-    acc1.withdraw(amount)
+    print("--- Пополнение ---")
+    acc3.deposit(300)
 
-    # перевод между счетами
-    print("\n--- Перевод ---")
-    amount = read_amount("Сумма перевода с 1001 на 1002: ")
-    acc1.transfer(acc2, amount)
+    print("--- Снятие ---")
+    acc1.withdraw(200)
+    acc1.withdraw(5000)
 
-    # итоговые балансы
-    print("\n--- Итоговые балансы ---")
+    print("--- Перевод ---")
+    acc2.transfer(acc3, 150)
+
+    print("--- Итог ---")
     for acc in (acc1, acc2, acc3):
         acc.show()
+
+    # пополнение счёта суммой, введённой с клавиатуры
+    amount = read_amount("Сумма для пополнения счёта 001: ")
+    acc1.deposit(amount)
+    acc1.show()
 
 
 main()
